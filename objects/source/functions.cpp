@@ -1,4 +1,4 @@
-#include"../header/functions.h"
+#include "../header/functions.h"
 
 void toggleRule(Game_Manager& gameStateManager, Game_Rule rule, const std::string& ruleName) {
     if (gameStateManager.isRuleEnabled(rule)) {
@@ -30,42 +30,42 @@ void togglePause(Game_Manager& gameStateManager) {
     }
 }
 
+// Helper function to handle toggling specific game rules
+void handleGameRuleEvent(sf::Keyboard::Key key, Game_Manager& gameStateManager) {
+    if (key == sf::Keyboard::V) {
+        toggleRule(gameStateManager, Game_Rule::ShowVision, "ShowVision");
+    }
+    else if (key == sf::Keyboard::C) {
+        toggleRule(gameStateManager, Game_Rule::BoidCohesion, "Boid Cohesion");
+    }
+    else if (key == sf::Keyboard::S) {
+        toggleRule(gameStateManager, Game_Rule::BoidSeparation, "Boid Separation");
+    }
+    else if (key == sf::Keyboard::A) {
+        toggleRule(gameStateManager, Game_Rule::VariableAngle, "Variable Angle");
+    }
+    else if (key == sf::Keyboard::Z) {
+        toggleRule(gameStateManager, Game_Rule::VariableVelocity, "Variable Velocity");
+    }
+}
+
+// Main event processing function
 void processEvent(sf::Event& event, Game_Manager& gameStateManager) {
-    // rest of runtime logic goes here
-    /**
-     * Place boid (Interaction)
-     * Clear all boids
-     * Place Obstacle
-     * Remove Obstacle
-     * Draw Boid visions and radius (Gamerules)
-     * Control acceleration
-     * Control Cohesion
-     * Control Direction
-     * Control Separation
-     */
-
     if (event.type == sf::Event::KeyPressed) {
-        // Handle rules
-        if (event.key.code == sf::Keyboard::V) {
-            toggleRule(gameStateManager, Game_Rule::ShowVision, "ShowVision");
-        }
-        if (event.key.code == sf::Keyboard::C) {
-            toggleRule(gameStateManager, Game_Rule::BoidCohesion, "Boid Cohesion");
-        }
-        if (event.key.code == sf::Keyboard::S) {
-            toggleRule(gameStateManager, Game_Rule::BoidSeparation, "Boid Separation");
-        }
-        if (event.key.code == sf::Keyboard::A) {
-            toggleRule(gameStateManager, Game_Rule::VariableAngle, "Variable Angle");
-        }
-        if (event.key.code == sf::Keyboard::Z) {
-            toggleRule(gameStateManager, Game_Rule::VariableVelocity, "Variable Velocity");
-        }
+        if (!gameStateManager.isPaused()) {
+        // Handle rules with the helper function
+            handleGameRuleEvent(event.key.code, gameStateManager);
 
-        // Handle obstacle mode
-        if (event.key.code == sf::Keyboard::D) {
-            toggleObstacleMode(gameStateManager);
+            // Handle obstacle mode toggle
+            if (event.key.code == sf::Keyboard::D) {
+                toggleObstacleMode(gameStateManager);
+            }
         }
+        // Handle pause toggle
+        if (event.key.code == sf::Keyboard::P) {
+            togglePause(gameStateManager);
+        }
+        
     }
 }
 
@@ -82,23 +82,12 @@ void renderPauseScreen(sf::RenderWindow& window, sf::Text& pauseText, sf::Text& 
 
 sf::Text renderText(const std::string& textString, const sf::Font& font, unsigned int charSize, const sf::Color& color, const sf::Vector2f& position) {
     sf::Text text;
-        text.setFont(font);
-        text.setString(textString);
-        text.setCharacterSize(charSize);
-        text.setFillColor(color);
-        text.setPosition(position);
-
-    // Return the text object instead of drawing it directly
-    return text;
-}
-
-void createAndAddMessage(Game_Manager& gameStateManager, const std::string& textString, const sf::Font& font, unsigned int charSize, const sf::Color& color, const sf::Vector2f& position, float duration, const std::string& category) {
-    sf::Text text;
     text.setFont(font);
     text.setString(textString);
     text.setCharacterSize(charSize);
     text.setFillColor(color);
     text.setPosition(position);
 
-    gameStateManager.addMessage(text, duration, category);
+    // Return the text object instead of drawing it directly
+    return text;
 }
