@@ -1,21 +1,44 @@
-#pragma once
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
 #include "game_manager.h"
+#include <SFML/Graphics.hpp>
 
-// Toggle a specific game rule (enable/disable)
-void toggleRule(Game_Manager& gameStateManager, Game_Rule rule, const std::string& ruleName);
+inline void toggleRule(Game_Manager& gameStateManager, Game_Rule rule, const std::string& ruleName) {
+    if (gameStateManager.isRuleEnabled(rule)) {
+        gameStateManager.disableRule(rule);
+        std::cout << ruleName << " is disabled!" << std::endl;
+        gameStateManager.addMessage(ruleName + " is disabled!", 3.0f, Message_Category::System, sf::Vector2f(100, 100));  // Example position
+    } else {
+        gameStateManager.enableRule(rule);
+        std::cout << ruleName << " is enabled!" << std::endl;
+        gameStateManager.addMessage(ruleName + " is enabled!", 3.0f, Message_Category::System, sf::Vector2f(100, 100)); 
+        gameStateManager.addMessage(ruleName + " is enabled!", 3.0f, Message_Category::System, sf::Vector2f(100, 100));  // Example position
+    }
+}
 
-// Toggle the obstacle mode (Place/Remove)
-void toggleObstacleMode(Game_Manager& gameStateManager);
+inline void toggleObstacleMode(Game_Manager& gameStateManager) {
+    // Only toggle mode if state has changed
+    Obstacle_Mode newMode = gameStateManager.isPlacing() ? Obstacle_Mode::Remove : Obstacle_Mode::Place;
+    gameStateManager.setMode(newMode);
+    
+    std::string modeMessage = (newMode == Obstacle_Mode::Remove) ? "Obstacle mode set to Remove!" : "Obstacle mode set to Place!";
+    std::cout << modeMessage << std::endl;
+    gameStateManager.addMessage(modeMessage, 3.0f, Message_Category::System, sf::Vector2f(100, 100));
+}
 
-// Toggle the pause state (pause/unpause)
-void togglePause(Game_Manager& gameStateManager);
+inline void togglePause(Game_Manager& gameStateManager) {
+    // Consolidate toggle pause functionality
+    Game_State newState = gameStateManager.isPaused() ? Game_State::Playing : Game_State::Paused;
+    gameStateManager.setState(newState);
+    
+    std::string stateMessage = (newState == Game_State::Playing) ? "Game resumed!" : "Game paused!";
+    std::cout << stateMessage << std::endl;
+    gameStateManager.addMessage(stateMessage, 3.0f, Message_Category::System, sf::Vector2f(100, 100));
+}
 
-// Process a specific event (keyboard, mouse, etc.)
+void handleGameRuleEvent(sf::Keyboard::Key key, Game_Manager& gameStateManager);
+
 void processEvent(sf::Event& event, Game_Manager& gameStateManager);
 
-// Render the pause screen with relevant texts
-void renderPauseScreen(sf::RenderWindow& window, sf::Text& pauseText, sf::Text& deleteText, const Game_Manager& gameStateManager);
-
-// Helper function to render text with specific attributes
-sf::Text renderText(const std::string& textString, const sf::Font& font, unsigned int charSize, const sf::Color& color, const sf::Vector2f& position);
+#endif
