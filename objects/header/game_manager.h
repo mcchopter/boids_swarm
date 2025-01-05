@@ -7,6 +7,8 @@
 #include <string>
 #include <deque>      // Use deque for message storage optimization
 #include <cstdint>    // For uint32_t
+#include "boid.h"     // Include Boid for boid management
+
 
 // Enum declarations
 enum class Game_State {
@@ -24,7 +26,7 @@ enum class Game_Rule : uint32_t {
     BoidCohesion     = 1 << 6,  // 64
     NoCohesion       = 1 << 7,  // 128
     BoidSeparation   = 1 << 8,  // 256
-    NoSeparation     = 1 << 9   // 512
+    NoSeparation     = 1 << 9,   // 512
 };
 
 enum class Obstacle_Mode {
@@ -41,15 +43,29 @@ enum class Message_Category {
 
 // Message structure
 struct Message {
-    Message(const std::string& msgText, float lifetime, Message_Category msgCategory, sf::Vector2f pos, bool isCenter);
+    std::string text;
+    sf::Vector2f position;
+    float lifetime, initialLifetime;  // Lifetime remaining
+    Message_Category category;
+    bool active;
 
-    std::string text;           // The content of the message
-    Message_Category category;  // The type of message (e.g., Input, Timed, System)
-    float duration;             // How long the message stays on the screen (0 = infinite)
-    sf::Clock timer;            // Tracks how long the message has been active
-    sf::Vector2f position;      // Position on the screen (if not centered)
-    bool center;                // Whether the message should be centered on the screen
+    Message(const std::string& t, float l, Message_Category c, sf::Vector2f p, bool a)
+        : text(t), position(p), lifetime(l), category(c), active(a) {
+            initialLifetime = l;
+        }
+
+    void update(float deltaTime) {
+        if (active) {
+            lifetime -= deltaTime;
+            if (lifetime <= 0) {
+                active = false;
+            }
+        }
+    }
 };
+
+
+
 
 // Game_Manager class
 class Game_Manager {
@@ -80,8 +96,13 @@ public:
     const std::deque<Message>& getMessages() const;  // Access the list of messages (changed to deque for better performance)
     bool isMessage() const;            // Check if there are any active messages
     void cleanCategory(Message_Category category);    // Remove all messages of a specific category
+    void updateMessages(float deltaTime);  // Update message lifetimes
 
+    std::vector<Boid>& getBoids();  // Access the boid vector
+    void updateBoids(sf::Time deltaTime, float width, float height);  // Update all boids
+    void addBoid(float x, float y, float iVelMag, float iAccMag, float sAngle);  // Add a new boid
 private:
+    std::vector<Boid> boids;
     sf::Font font;                   // Font for rendering text
     Game_State Current_State;        // Current game state
     uint32_t activeRules = 0;        // Bitmask for active game rules

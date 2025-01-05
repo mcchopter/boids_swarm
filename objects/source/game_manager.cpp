@@ -2,14 +2,8 @@
 #include <algorithm> // For std::remove_if
 #include <unordered_set>  // For quick duplicate checking
 
-Message::Message(const std::string& msgText, float lifetime, Message_Category msgCategory, sf::Vector2f pos, bool isCenter)
-    : text(msgText),
-      category(msgCategory),
-      duration(lifetime),
-      position(pos),
-      center(isCenter) {
-    timer.restart(); // Start the timer to track the message's lifetime
-}
+
+
 
 
 // Constants and Initializations
@@ -102,6 +96,7 @@ void Game_Manager::cleanCategory(Message_Category category) {
 void Game_Manager::addMessage(const std::string& inText, float lifetime, Message_Category category, sf::Vector2f position) {
     // Ensure the input category is clean before adding
     if (category == Message_Category::Input) {
+        // std::cout << "Supposedly cleaninng" << std::endl;
         cleanCategory(Message_Category::Input);  // Clear previous input messages
     }
 
@@ -115,6 +110,20 @@ void Game_Manager::addMessage(const std::string& inText, float lifetime, Message
     }
 }
 
+void Game_Manager::updateMessages(float deltaTime) {
+    for (auto it = messages.begin(); it != messages.end(); ) {
+        it->update(deltaTime);  // Update the message's lifetime
+
+        if (!it->active) {  // If the message is no longer active, remove it
+            it = messages.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+
+
 
 // Get the list of messages
 const std::deque<Message>& Game_Manager::getMessages() const {
@@ -125,4 +134,18 @@ const std::deque<Message>& Game_Manager::getMessages() const {
 // Check if there are any messages
 bool Game_Manager::isMessage() const {
     return !messages.empty();
+}
+
+std::vector<Boid>& Game_Manager::getBoids() {
+    return boids;
+}
+void Game_Manager::updateBoids(sf::Time deltaTime, float width, float height) {
+    for (auto& boid : boids) {
+        boid.setNeighbors(boids, width, height);
+        boid.update(deltaTime, width, height);
+    }
+}
+
+void Game_Manager::addBoid(float x, float y, float iVelMag, float iAccMag, float sAngle) {
+    boids.emplace_back(x, y, iVelMag, iAccMag, sAngle);
 }

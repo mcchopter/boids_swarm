@@ -1,4 +1,4 @@
-SRC_FILES = main.cpp ../objects/source/boid.cpp ../objects/source/obstacle.cpp ../objects/source/game_manager.cpp ../objects/source/functions.cpp ../objects/source/renderer.cpp
+SRC_FILES = main.cpp ../objects/source/boid.cpp ../objects/source/obstacle.cpp ../objects/source/game_manager.cpp ../objects/source/functions.cpp ../objects/source/renderer.cpp ../objects/source/boid.cpp
 
 BUILD_DIR = ../compile_files
 
